@@ -57,147 +57,163 @@ An out-of-range access will throw an exception that the user can catch.
 #include <iomanip>
 #include <vector>
 
-//using namespace std;
+namespace had {
 
-template<typename T>
-class evector : public std::vector<T> {
-	//on toString() consider zero if lower than printAsZero
-	//this way avoids printing negative zeros: -0.000
-	static constexpr double printAsZero = 1e-10;
-	static constexpr char defaultSeparator = ' ';
-	static constexpr int defaultPrecision = -1;
-	static constexpr int defaultFixedPrecision = -1;
+	template<typename T>
+	class evector : public std::vector<T> {
+		//on toString() consider zero if lower than printAsZero
+		//this way avoids printing negative zeros: -0.000
+		static constexpr double printAsZero = 1e-10;
+		static constexpr char defaultSeparator = ' ';
+		static constexpr int defaultPrecision = -1;
+		static constexpr int defaultFixedPrecision = -1;
 
-public:
-	//NOTE: does NOT convert from vector to evector
-	using std::vector<T>::vector; //use the constructors from vector
+	public:
+		//NOTE: does NOT convert from vector to evector
+		using std::vector<T>::vector; //use the constructors from vector
 
-	/**
-	 * Extend vector, symmetric extension
-	 *
-	 * @param eb: number of elements to add at the beginning
-	 * @param ea: number of elements to add at the end
-	 *
-	 * PRE: this.size() > 0
-	 * Example: { 1, 2 }.symmExt(3,3) = { 2, 2, 1, 1, 2, 2, 1, 1}
-	 *
-	 */
-	void symmExt(int eb, int ea) {
-		int size = this->size();
-		if (size <= 0)
-			throw std::length_error("Can only extend vectors with size() > 0");
+		/**
+		 * Extend vector, symmetric extension
+		 *
+		 * @param eb: number of elements to add at the beginning
+		 * @param ea: number of elements to add at the end
+		 *
+		 * PRE: this.size() > 0
+		 * Example: { 1, 2 }.symmExt(3,3) = { 2, 2, 1, 1, 2, 2, 1, 1}
+		 *
+		 */
+		void symmExt(int eb, int ea) {
+			int size = this->size();
+			if (size <= 0)
+				throw std::length_error("Can only extend vectors with size() > 0");
 
 
-		//Symmetric extend
-		//check if signal is large enough to symmetric extend.
-		//If NOT extend until its possible and iterate on new partial
-		//extended signal until full extension complete
-		//TODO: maybe these loops can be simpler
-		int ebfixed = eb;
-		do {
-			size = this->size();
-			if (size - eb <= 0) { ebfixed = size; eb -= size; }
-			else 				{ ebfixed = eb; eb = 0; }
-			this->insert(this->begin(), this->rend()-ebfixed, this->rend());
-		} while (eb > 0);
+			//Symmetric extend
+			//check if signal is large enough to symmetric extend.
+			//If NOT extend until its possible and iterate on new partial
+			//extended signal until full extension complete
+			//TODO: maybe these loops can be simpler
+			int ebfixed = eb;
+			do {
+				size = this->size();
+				if (size - eb <= 0) {
+					ebfixed = size;
+					eb -= size;
+				}
+				else {
+					ebfixed = eb;
+					eb = 0;
+				}
+				this->insert(this->begin(), this->rend() - ebfixed, this->rend());
+			} while (eb > 0);
 
-		int eafixed = ea;
-		do {
-			size = this->size();
-			if (size - ea <= 0) { eafixed = size; ea -= size; }
-			else 				{ eafixed = ea; ea = 0; }
-			this->insert(this->end(), this->rbegin(), this->rbegin()+eafixed);
-		} while (ea > 0);
+			int eafixed = ea;
+			do {
+				size = this->size();
+				if (size - ea <= 0) {
+					eafixed = size;
+					ea -= size;
+				}
+				else {
+					eafixed = ea;
+					ea = 0;
+				}
+				this->insert(this->end(), this->rbegin(), this->rbegin() + eafixed);
+			} while (ea > 0);
 
+			/*
+			//implementation of: http://wavelet2d.sourceforge.net/ symm_ext()
+			//does not extend signals smaller than the number of elements to extend
+			unsigned int len = this->size();
+			//int l = ??; //number of elements to add at front and back of this vector
+						  //assumes: l = ea = eb
+			for (int i =0; i < l; i++) {
+				//rewrite with out cycle
+				T temp1 = (*this)[i * 2];
+				T temp2 = (*this)[len - 1];
+				this->insert(this->begin(), temp1);
+				this->insert(this->end(), temp2);
+			}
+			*/
+		}
+
+		/**
+		 * @return average of vector
+		 */
+		double avg() {
+			return accumulate(this->begin(), this->end(), 0.0) / this->size();
+		}
+
+		std::string toString(char sep = ' ', int prec = defaultPrecision, int fixedPrec = defaultFixedPrecision) const {
+			std::stringstream os;
+			//override default precisions
+			if (prec >= 0) os << std::setprecision(prec);
+			if (fixedPrec >= 0) os << std::fixed << std::setprecision(fixedPrec);
+
+			os << "[" << sep;
+			for (int i = 0; i < this->size(); ++i) {
+				double val = (*this)[i];
+				//Avoid printing negative zero: -0.0 for very small number near zero
+				if (std::abs(val) < printAsZero)
+					val = 0.0;
+				os << val << sep;
+			}
+			os << "]";
+			return os.str();
+		}
+
+		//Could use Named Parameter Idiom
+		//https://isocpp.org/wiki/faq/ctors#named-parameter-idiom
+		//see also project namedParIdiom on these folders
+		std::string toString(int prec) const { return toString(defaultSeparator, prec); }
+		//Cannot do the next overload, cause signature is equal to previous overloaded func: toString(int)
+		//string toString(int fixedPrec) { return toString(defaultSeparator, defaultPrecision, fixedPrec); }
+
+		//template <typename T>
+		//friend ostream& operator<<(ostream& os, const evector<T>& v);
+
+		/**
+		 * PRE: a.size() == b.size()
+		 * POS: return have a.size()
+		 *
+		 * @param vector subtraction
+		 * @return
+		 */
 		/*
-		//implementation of: http://wavelet2d.sourceforge.net/ symm_ext()
-		//does not extend signals smaller than the number of elements to extend
-		unsigned int len = this->size();
-		//int l = ??; //number of elements to add at front and back of this vector
-		              //assumes: l = ea = eb
-		for (int i =0; i < l; i++) {
-			//rewrite with out cycle
-			T temp1 = (*this)[i * 2];
-			T temp2 = (*this)[len - 1];
-			this->insert(this->begin(), temp1);
-			this->insert(this->end(), temp2);
-		}
-		*/
+		 * Buggy
+	   evector<T>& operator-=(const evector<T>&a) {
+		   for (int i=0; i<a.size(); ++i)
+			   *this[i]-=a[i];
+		   return *this;
+	   }
+
+	   friend evector<T> operator-(evector<T>&a, const evector<T>& b) {
+		   return a-=b;
+	   }
+
+	   inline bool operator<(const T&a){
+		   for (int i=0; i<a.size(); ++i)
+			   if (!(*this[i]<a[i])) return false;
+		   return true;
+	   }
+
+	   friend inline bool operator<(const evector<T>&a, const evector<T>& b){
+		   for (int i=0; i<a.size(); ++i)
+			   if (!(a[i]<b[i])) return false;
+		   return true;
+	   }
+	   */
+	};
+
+
+	template<typename T>
+	std::ostream &operator<<(std::ostream &os, const evector<T> &v) {
+		os << v.toString();
+		return os;
 	}
 
-	/**
-	 * @return average of vector
-	 */
-	double avg() {
-		return accumulate(this->begin(), this->end(), 0.0) / this->size();
-	}
-
-	std::string toString(char sep=' ', int prec=defaultPrecision, int fixedPrec=defaultFixedPrecision) const {
-		std::stringstream os;
-		//override default precisions
-		if (prec>=0) os << std::setprecision(prec);
-		if (fixedPrec>=0) os << std::fixed << std::setprecision(fixedPrec);
-
-		os << "[" << sep;
-		for (int i=0; i < this->size(); ++i) {
-			double val = (*this)[i];
-			//Avoid printing negative zero: -0.0 for very small number near zero
-			if (std::abs(val) < printAsZero)
-				val = 0.0;
-			os << val << sep;
-		}
-		os << "]";
-		return os.str();
-	}
-
-	//Could use Named Parameter Idiom
-	//https://isocpp.org/wiki/faq/ctors#named-parameter-idiom
-	//see also project namedParIdiom on these folders
-	std::string toString(int prec) const { return toString(defaultSeparator, prec); }
-	//Cannot do the next overload, cause signature is equal to previous overloaded func: toString(int)
-	//string toString(int fixedPrec) { return toString(defaultSeparator, defaultPrecision, fixedPrec); }
-
-	//template <typename T>
-	//friend ostream& operator<<(ostream& os, const evector<T>& v);
-
-	/**
-	 * PRE: a.size() == b.size()
-	 * POS: return have a.size()
-	 *
-	 * @param vector subtraction
-	 * @return
-	 */
-	 /*
-	  * BUggy
-	evector<T>& operator-=(const evector<T>&a) {
-		for (int i=0; i<a.size(); ++i)
-			*this[i]-=a[i];
-		return *this;
-	}
-
-	friend evector<T> operator-(evector<T>&a, const evector<T>& b) {
-		return a-=b;
-	}
-
-	inline bool operator<(const T&a){
-		for (int i=0; i<a.size(); ++i)
-			if (!(*this[i]<a[i])) return false;
-		return true;
-	}
-
-	friend inline bool operator<(const evector<T>&a, const evector<T>& b){
-		for (int i=0; i<a.size(); ++i)
-			if (!(a[i]<b[i])) return false;
-		return true;
-	}
-	*/
-};
-
-
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const evector<T>& v) {
-	os << v.toString();
-	return os;
-}
+} //end namespace had
 
 #endif //INC_04_WAVELETS_EVECTOR_HPP
+
+

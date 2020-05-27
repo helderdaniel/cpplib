@@ -7,9 +7,10 @@
 */
 
 #include <iostream>
-#include "stopwatch.h"
+#include "stopwatch.hpp"
 
 using namespace std;
+using namespace had;
 
 int main (int argc, char** argv) {
 StopWatch sw;

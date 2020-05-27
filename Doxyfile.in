@@ -1,0 +1,12 @@
+PROJECT_NAME           = "cpp had lib"
+OUTPUT_DIRECTORY       = doc
+INPUT                  = .
+
+#generate also for *.cpp not only *.hpp
+EXTRACT_ALL            = YES
+RECURSIVE              = YES
+
+EXCLUDE_PATTERNS       = */doc/* \
+                         */catch2/* \
+                         */wavelib/*
+
