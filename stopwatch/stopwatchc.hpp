@@ -33,7 +33,7 @@ clock_t start, end;
 
 public:
 	/**
-	 * Creates StopWatch object and resests timers
+	 * Creates StopWatch object and resets timers
 	 */
 	StopWatch() { reset(); }
 

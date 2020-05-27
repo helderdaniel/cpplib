@@ -19,13 +19,15 @@ set(CMAKE_EXE_LINKER_FLAGS  ${GCC_EXTRA_LINK_FLAGS})
 #Project name
 project(stopwatch)
 
+#project folders
+set(TEST "test")
 
 #include folders
 set(INCLUDE "/home/hdaniel/Dropbox/01-libs/cpp")
 include_directories(. ${INCLUDE} )
 
 #Unit tests
-set(UNITTEST "tests")
-add_executable(${UNITTEST} ${UNITTEST}.cpp)
+set(UNITTEST "testStopwatch")
+add_executable(${UNITTEST} ${TEST}/${UNITTEST}.cpp)
 
 
