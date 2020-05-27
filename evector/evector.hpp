@@ -51,16 +51,20 @@ Vec inherits everything from vector except for the subscript operations that it 
 An out-of-range access will throw an exception that the user can catch.
 */
 
-
-#include <ostream>
-#include <sstream>
 #include <iomanip>
-#include <vector>
+
+using std::cout;
+using std::fixed;
+using std::setprecision;
+using std::string;
+using std::vector;
+using std::ostream;
+using std::stringstream;
 
 namespace had {
 
 	template<typename T>
-	class evector : public std::vector<T> {
+	class evector : public vector<T> {
 		//on toString() consider zero if lower than printAsZero
 		//this way avoids printing negative zeros: -0.000
 		static constexpr double printAsZero = 1e-10;
@@ -70,7 +74,7 @@ namespace had {
 
 	public:
 		//NOTE: does NOT convert from vector to evector
-		using std::vector<T>::vector; //use the constructors from vector
+		using vector<T>::vector; //use the constructors from vector
 
 		/**
 		 * Extend vector, symmetric extension
@@ -144,17 +148,17 @@ namespace had {
 			return accumulate(this->begin(), this->end(), 0.0) / this->size();
 		}
 
-		std::string toString(char sep = ' ', int prec = defaultPrecision, int fixedPrec = defaultFixedPrecision) const {
-			std::stringstream os;
+		string toString(char sep = ' ', int prec = defaultPrecision, int fixedPrec = defaultFixedPrecision) const {
+			stringstream os;
 			//override default precisions
-			if (prec >= 0) os << std::setprecision(prec);
-			if (fixedPrec >= 0) os << std::fixed << std::setprecision(fixedPrec);
+			if (prec >= 0) os << setprecision(prec);
+			if (fixedPrec >= 0) os << fixed << setprecision(fixedPrec);
 
 			os << "[" << sep;
 			for (int i = 0; i < this->size(); ++i) {
 				double val = (*this)[i];
 				//Avoid printing negative zero: -0.0 for very small number near zero
-				if (std::abs(val) < printAsZero)
+				if (abs(val) < printAsZero)
 					val = 0.0;
 				os << val << sep;
 			}
@@ -165,7 +169,7 @@ namespace had {
 		//Could use Named Parameter Idiom
 		//https://isocpp.org/wiki/faq/ctors#named-parameter-idiom
 		//see also project namedParIdiom on these folders
-		std::string toString(int prec) const { return toString(defaultSeparator, prec); }
+		string toString(int prec) const { return toString(defaultSeparator, prec); }
 		//Cannot do the next overload, cause signature is equal to previous overloaded func: toString(int)
 		//string toString(int fixedPrec) { return toString(defaultSeparator, defaultPrecision, fixedPrec); }
 
@@ -207,7 +211,7 @@ namespace had {
 
 
 	template<typename T>
-	std::ostream &operator<<(std::ostream &os, const evector<T> &v) {
+	ostream &operator<<(ostream &os, const evector<T> &v) {
 		os << v.toString();
 		return os;
 	}

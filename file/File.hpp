@@ -8,13 +8,27 @@
 #ifndef MOOSHAKTOOLS_FILE_H
 #define MOOSHAKTOOLS_FILE_H
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <cstring>
-#include <filesystem>
-#include <regex>
-#include <istream>
 #include <fstream>
+#include <istream>
+#include <regex>
+#include <filesystem>
+
+using std::string;
+using std::vector;
+using std::array;
+using std::exception;
+using std::runtime_error;
+using std::to_string;
+using std::streamsize;
+using std::istream;
+using std::ifstream;
+using std::istreambuf_iterator;
+using std::next;
+using std::ostream;
+using std::ofstream;
+using std::stringstream;
+using std::regex;
+//using std::filesystem::path;
 
 namespace fs = std::filesystem;
 
@@ -29,8 +43,8 @@ namespace had {
 		 *
 		 * @param fname name of file
 		 */
-		static void fileError(const std::string &fname) {
-			throw std::runtime_error(fname + " error: " + std::to_string(errno));
+		static void fileError(const string &fname) {
+			throw runtime_error(fname + " error: " + to_string(errno));
 		}
 
 
@@ -41,7 +55,7 @@ namespace had {
 		 * @param sf0 first opened file descriptor
 		 * @param sf1 second opened file descriptor
 		 */
-		static void openFiles(const std::string &fn0, const std::string &fn1, FILE *&sf0, FILE *&sf1) {
+		static void openFiles(const string &fn0, const string &fn1, FILE *&sf0, FILE *&sf1) {
 			sf0 = fopen(fn0.c_str(), "r");
 			if (!sf0) fileError(fn0);
 
@@ -77,14 +91,14 @@ namespace had {
 		 * @param sf file to read
 		 * @return the contents of sf as a string
 		 */
-		static std::string _read(FILE *const sf) {
-			std::array<char, bufsize> buffer;
+		static string _read(FILE *const sf) {
+			array<char, bufsize> buffer;
 			int count;
-			std::string ret;
+			string ret;
 
 			do {
 				count = fread(buffer.data(), 1, bufsize, sf);
-				ret.insert(ret.end(), std::begin(buffer), std::next(std::begin(buffer), count));
+				ret.insert(ret.end(), begin(buffer), next(begin(buffer), count));
 			} while (count > 0);
 
 			return ret;
@@ -119,8 +133,8 @@ namespace had {
 		  * @return true if files sf0 and sf1 reference files with equal contents
 		 */
 		static bool _cmpbin(FILE *const sf0, FILE *const sf1) {
-			std::array<char, bufsize> buf0;
-			std::array<char, bufsize> buf1;
+			array<char, bufsize> buf0;
+			array<char, bufsize> buf1;
 			bool ret = true;
 			size_t count0, count1;
 
@@ -134,7 +148,7 @@ namespace had {
 
 				//Something wrong when reading
 				//since files have same size here
-				if (count0 != count1) throw std::runtime_error("fread() error: " + std::to_string(errno));
+				if (count0 != count1) throw runtime_error("fread() error: " + to_string(errno));
 
 				for (int i = 0; i < count0; i++)
 					if (buf0[i] != buf1[i]) {
@@ -152,12 +166,12 @@ namespace had {
 		   * @param  sf1 is another stream to compare against
 		  * @return true if streams sf0 and sf1 have equal contents
 		 */
-		static bool _cmpbin(std::istream sf0, std::istream sf1) {
-			std::array<char, bufsize> buf0;
-			std::array<char, bufsize> buf1;
+		static bool _cmpbin(istream sf0, istream sf1) {
+			array<char, bufsize> buf0;
+			array<char, bufsize> buf1;
 			bool ret = true;
 
-			std::streamsize count0, count1;
+			streamsize count0, count1;
 
 			//can not get length of all stream types
 			//must always compare
@@ -196,10 +210,10 @@ namespace had {
 		 * 				Actual:
 		 * 				<fn0>
 		 */
-		static std::string _test(std::istream &expected, std::istream &actual) {
-			std::string sexp = File::read(expected);
-			std::string sact = File::read(actual);
-			std::string ret;
+		static string _test(istream &expected, istream &actual) {
+			string sexp = File::read(expected);
+			string sact = File::read(actual);
+			string ret;
 
 			//if strings differ
 			if (sexp != sact)
@@ -214,10 +228,10 @@ namespace had {
 		 * @param fn filename of file to read
 		 * @return the contents of fn as a string
 		 */
-		static std::string read(const std::string &fn) {
+		static string read(const string &fn) {
 			FILE *const sf = fopen(fn.c_str(), "r");
 			if (!sf) fileError(fn);
-			std::string ret = _read(sf);
+			string ret = _read(sf);
 			fclose(sf);
 			return ret;
 		}
@@ -228,17 +242,17 @@ namespace had {
 		 * @param sf stream to read
 		 * @return the contents of sf as a string
 		 */
-		static std::string read(std::istream &sf) {
-			return {std::istreambuf_iterator<char>(sf), std::istreambuf_iterator<char>()};
+		static string read(istream &sf) {
+			return {istreambuf_iterator<char>(sf), istreambuf_iterator<char>()};
 			//low level way
 			/*
-			std::array<char, bufsize> buffer;
-			std::streamsize count;
-			std::string ret;
+			array<char, bufsize> buffer;
+			streamsize count;
+			string ret;
 			do {
 				sf.read(buffer.data(), bufsize);
 				count = sf.gcount();
-				ret.insert(ret.end(), std::begin(buffer), std::next(std::begin(buffer), count));
+				ret.insert(ret.end(), begin(buffer), next(begin(buffer), count));
 			} while (count>0);
 
 			return ret;
@@ -252,7 +266,7 @@ namespace had {
 		 * @param  fn1 filename of another file to compare against
 		 * @return true if both file sizes are equal
 		 */
-		static bool cmpsize(const std::string &fn0, const std::string &fn1) {
+		static bool cmpsize(const string &fn0, const string &fn1) {
 			FILE *sf0, *sf1;
 
 			openFiles(fn0, fn1, sf0, sf1);
@@ -267,7 +281,7 @@ namespace had {
 		 * @param  fn1 filename of file to compare against
 		 * @return true if files fn0 and fn1 are equal
 		 */
-		static bool cmpbin(const std::string &fn0, const std::string &fn1) {
+		static bool cmpbin(const string &fn0, const string &fn1) {
 			FILE *sf0, *sf1;
 
 			openFiles(fn0, fn1, sf0, sf1);
@@ -286,10 +300,10 @@ namespace had {
 		 * 				<fn0 line>
 		 * 				<fn1 line>
 		 */
-		static std::string cmptext(const std::string &fn0, const std::string &fn1) {
-			std::array<char, maxLinesize> buf0;
-			std::array<char, maxLinesize> buf1;
-			std::string ret;
+		static string cmptext(const string &fn0, const string &fn1) {
+			array<char, maxLinesize> buf0;
+			array<char, maxLinesize> buf1;
+			string ret;
 			int line = 0;
 			char *str0, *str1;
 			FILE *sf0, *sf1;
@@ -326,8 +340,8 @@ namespace had {
 
 
 		/*
-		static std::string test(const std::string& expected, const std::string& actual) {
-			std::string ret;
+		static string test(const string& expected, const string& actual) {
+			string ret;
 			FILE *sfexp, *sfact;
 
 			openFiles(expected, actual, sfexp, sfact);
@@ -358,9 +372,9 @@ namespace had {
 		 * 				Actual:
 		 * 				<fn0>
 		 */
-		static std::string test(const std::string &expected, const std::string &actual) {
-			std::ifstream exp(expected, std::ifstream::binary);
-			std::ifstream act(actual, std::ofstream::binary);
+		static string test(const string &expected, const string &actual) {
+			ifstream exp(expected, ifstream::binary);
+			ifstream act(actual, ofstream::binary);
 			return _test(exp, act);
 		}
 
@@ -375,15 +389,15 @@ namespace had {
 		 * 				Actual:
 		 * 				<fn0>
 		 */
-		static std::string teststr(const std::string &expected, const std::string &actual) {
-			std::ifstream exp;
-			exp.exceptions(std::ifstream::failbit);
+		static string teststr(const string &expected, const string &actual) {
+			ifstream exp;
+			exp.exceptions(ifstream::failbit);
 			try {
-				exp.open(expected, std::ifstream::binary);
-			} catch (const std::exception &e) {
+				exp.open(expected, ifstream::binary);
+			} catch (const exception &e) {
 				fileError(expected);
 			}
-			std::stringstream act(actual);
+			stringstream act(actual);
 			return _test(exp, act);
 		}
 
@@ -395,14 +409,14 @@ namespace had {
 		 * @param depth  maximum recursion depth (root dir has depth 0)
 		 * @return vector of paths that matches regex, form root directory dir
 		 */
-		static std::vector<fs::path> search(const std::string &dir, const std::string &regex, const int depth = -1) {
-			std::vector<fs::path> v;
+		static vector<fs::path> search(const string &dir, const string &regexstr, const int depth = -1) {
+			vector<fs::path> v;
 
 			auto it = fs::recursive_directory_iterator(dir);
 			for (auto &p: it) {
 				int id = it.depth();
 				if (depth >= 0 && id > depth) continue;
-				if (std::regex_match(p.path().filename().c_str(), std::regex(regex)))
+				if (regex_match(p.path().filename().c_str(), regex(regexstr)))
 					v.push_back(p.path());
 			}
 			return v;

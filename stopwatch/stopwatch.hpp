@@ -15,8 +15,9 @@
 #include <chrono>
 #include <iostream>
 
-using namespace std;
-using namespace ::std::chrono;
+using namespace std::chrono;
+
+using std::ostream;
 
 namespace had {
 
@@ -52,12 +53,12 @@ namespace had {
 		 * Returns time elapsed since last reset() until last lap()
 		 * DOES count user input like wait keypress
 		 */
-		double watch() {
+		double watch() const {
 			return elapsedTime;
 			//No method chain here, since returns time
 		}
 
-		//friend ostream& operator << (ostream& os, StopWatch& c);
+		friend ostream& operator << (ostream&, StopWatch&);
 	};
 
 	/**
