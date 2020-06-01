@@ -28,7 +28,6 @@ using std::ostream;
 using std::ofstream;
 using std::stringstream;
 using std::regex;
-//using std::filesystem::path;
 
 namespace fs = std::filesystem;
 
@@ -43,23 +42,26 @@ namespace had {
 		 *
 		 * @param fname name of file
 		 */
-		static void fileError(const string &fname) {
-			throw runtime_error(fname + " error: " + to_string(errno));
+		static void fileError(const string &fname, const int err=errno) {
+			throw runtime_error(fname + " error: " + to_string(err));
 		}
 
 
 		/**
 		 *
 		 * @param fn0 filename of a file to open
-		  * @param fn1 filename of another file to open
+		 * @param fn1 filename of another file to open
 		 * @param sf0 first opened file descriptor
 		 * @param sf1 second opened file descriptor
+		 * @param mode0 file fn0 open mode, default "r", to write specify "w", to read and write "r+"
+		 * @param mode1 file fn0 open mode, default "r", to write specify "w", to read and write "r+"
 		 */
-		static void openFiles(const string &fn0, const string &fn1, FILE *&sf0, FILE *&sf1) {
-			sf0 = fopen(fn0.c_str(), "r");
+		static void openFiles(const string &fn0, const string &fn1, FILE *&sf0, FILE *&sf1,
+							  const string &mode0="r", const string &mode1="r") {
+			sf0 = fopen(fn0.c_str(), mode0.c_str());
 			if (!sf0) fileError(fn0);
 
-			sf1 = fopen(fn1.c_str(), "r");
+			sf1 = fopen(fn1.c_str(), mode1.c_str());
 			if (!sf1) fileError(fn1);
 		}
 
@@ -129,8 +131,8 @@ namespace had {
 
 		/**
 		 * @param  sf0 a file descriptor
-		   * @param  sf1 another file descriptor
-		  * @return true if files sf0 and sf1 reference files with equal contents
+		 * @param  sf1 another file descriptor
+		 * @return true if files sf0 and sf1 reference files with equal contents
 		 */
 		static bool _cmpbin(FILE *const sf0, FILE *const sf1) {
 			array<char, bufsize> buf0;
@@ -163,8 +165,8 @@ namespace had {
 
 		/**
 		 * @param  sf0 a stream
-		   * @param  sf1 is another stream to compare against
-		  * @return true if streams sf0 and sf1 have equal contents
+		 * @param  sf1 is another stream to compare against
+		 * @return true if streams sf0 and sf1 have equal contents
 		 */
 		static bool _cmpbin(istream sf0, istream sf1) {
 			array<char, bufsize> buf0;
@@ -420,6 +422,33 @@ namespace had {
 					v.push_back(p.path());
 			}
 			return v;
+		}
+
+
+		/**
+		* Copies file src to file dest.
+		* overwrites desd.
+		*
+		* @param fn0 filename of source file
+		* @param fn1 filename of destination file
+		*/
+		static void copy(const string &src, const string &dst) {
+			array<char, bufsize> buffer;
+			FILE *sfsrc, *sfdst;
+			int count;
+
+			openFiles(src, dst, sfsrc, sfdst, "r", "w");
+			clearerr(sfsrc);
+			clearerr(sfdst);
+			do {
+				count = fread(buffer.data(), 1, bufsize, sfsrc);
+				if (ferror(sfsrc) != 0)  fileError(src, -1);
+				fwrite(buffer.data(), 1, count, sfdst);
+				if (ferror(sfdst) != 0)  fileError(src, -1);
+
+			} while (count > 0);
+
+			closeFiles(sfsrc, sfdst);
 		}
 
 	};

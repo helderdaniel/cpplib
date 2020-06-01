@@ -7,7 +7,9 @@
 
 using namespace had;
 
-const std::string path   = "../test/samples/files/";
+const std::string path     = "../test/samples/files/";
+const std::string file0c   = path + "file0.copy.txt";
+const std::string file0ro  = path + "file0.ro.txt";
 const std::string file0    = path + "file0.txt";
 const std::string file1    = path + "file1.txt";
 const std::string file2    = path + "file2.txt";
@@ -35,6 +37,35 @@ std::string searchPathToString(const std::string& dir, const std::string& regex,
 }
 
 
+TEST_CASE( "Copy" "[File]" ) {
+
+	//File NOT found
+	REQUIRE_THROWS_AS(
+			File::copy(file0, fileNull),
+			std::runtime_error);
+	REQUIRE_THROWS_WITH(File::copy(file0, fileNull), fileNull + " error: 2");
+	REQUIRE_THROWS_AS(
+			File::copy(fileNull, file0c),
+			std::runtime_error);
+	REQUIRE_THROWS_WITH(File::copy(fileNull, file0c), fileNull + " error: 2");
+	REQUIRE_THROWS_AS(
+			File::copy(fileNE, file0c),
+			std::runtime_error);
+	REQUIRE_THROWS_WITH(File::copy(fileNE, file0c), fileNE + " error: 2");
+
+	//Read only destination
+	REQUIRE_THROWS_AS(
+			File::copy(file0, file0ro),
+			std::runtime_error);
+	REQUIRE_THROWS_WITH(File::copy(file0, file0ro), file0ro + " error: 13");
+
+
+	//OK copy
+	File::copy(file0, file0c);
+	REQUIRE(File::cmpbin(file0, file0c));
+}
+
+
 TEST_CASE( "Read" "[File]" ) {
 	const std::string s3 =
 					"one\n"
@@ -50,6 +81,8 @@ TEST_CASE( "Read" "[File]" ) {
 
 TEST_CASE( "Search" "[File]" ) {
 	const std::string expA =
+						"../test/samples/files/file0.copy.txt\n"
+						"../test/samples/files/file0.ro.txt\n"
 						"../test/samples/files/file0.txt\n"
 				      	"../test/samples/files/file1.txt\n"
 		 			  	"../test/samples/files/file2.txt\n"
