@@ -88,4 +88,10 @@ TEST_CASE( "String utilities", "[String]" ) {
 		}
 	}
 
+	SECTION("rnd") {
+		srand(0);
+		REQUIRE(String::rand(3) == string("g\306i"));
+		REQUIRE(String::randAlphaNum(16) == "7JncCHryDsbzayy4");
+	}
+
 }

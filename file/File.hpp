@@ -108,6 +108,17 @@ namespace had {
 
 
 		/**
+		 * @param sf file to be overwritten
+		 * @param str string to be written
+		 */
+		static void _write(FILE *const sf, const string &str) {
+			int count, idx=0;
+
+			fwrite(&str[idx], 1, str.size(), sf);
+		}
+
+
+		/**
 		 * @param  sf0 a file descriptor
 		   * @param  sf1 another file descriptor
 		  * @return true if both file sizes are equal
@@ -236,6 +247,19 @@ namespace had {
 			string ret = _read(sf);
 			fclose(sf);
 			return ret;
+		}
+
+
+		/**
+		 *
+		 * @param fn filename of file to be overwritten
+		 * @param str string to be written
+		 */
+		static void write(const string &fn, const string &str) {
+			FILE *const sf = fopen(fn.c_str(), "w");
+			if (!sf) fileError(fn);
+			_write(sf, str);
+			fclose(sf);
 		}
 
 

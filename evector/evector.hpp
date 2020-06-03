@@ -148,7 +148,14 @@ namespace had {
 			return accumulate(this->begin(), this->end(), 0.0) / this->size();
 		}
 
-		string toString(char sep = ' ', int prec = defaultPrecision, int fixedPrec = defaultFixedPrecision) const {
+		/**
+		 *
+		 * @param sep separator character, default is a ASCII space
+		 * @param prec precision
+		 * @param fixedPrec fixed precision
+		 * @return vector as a string
+		 */
+		string toString(char sep = defaultSeparator, int prec = defaultPrecision, int fixedPrec = defaultFixedPrecision) const {
 			stringstream os;
 			//override default precisions
 			if (prec >= 0) os << setprecision(prec);

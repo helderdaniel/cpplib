@@ -12,18 +12,16 @@ using std::string;
 TEST_CASE( "Table2", "[Table2]" ) {
 	enum Enum { A, B, C, D };
 
-	map<int, string> t0 = {
+	const map<int, string> t0 = {
 			{ 1, "One" },
 			{3, "Three" },
 			{ 4, "Four" }
-
 	};
 
-	map<Enum, string> t1 = {
+	const map<Enum, string> t1 = {
 			{ A, "One" },
 			{ C, "Three" },
 			{ D, "Four" }
-
 	};
 
 
