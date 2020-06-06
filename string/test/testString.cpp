@@ -94,4 +94,19 @@ TEST_CASE( "String utilities", "[String]" ) {
 		REQUIRE(String::randAlphaNum(16) == "7JncCHryDsbzayy4");
 	}
 
+	SECTION("regex_replace") {
+
+		int cases = 3;
+		string str[] = {"0a1b2c3d4", "0a1b2c3d4", "asd"};
+		string exp[] = {"?a?b?c?d?", "0-1-2-3-4", "asd"};
+		string rgx[] = {"[0-9]", "(\\D)", "(\\d)"};
+		string rpl[] = {"?", "-", ""};
+		bool found[] = {true, true, false};
+
+		for (int i = 0; i < cases; ++i) {
+			bool f = String::regex_replace(str[i], rgx[i], rpl[i]);
+			REQUIRE(str[i] == exp[i]);
+			REQUIRE(f == found[i]);
+		}
+	}
 }

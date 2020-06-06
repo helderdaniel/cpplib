@@ -9,14 +9,18 @@
 #define MOOSHAKTOOLS_STRING_HPP
 
 #include <cstring>
+#include <regex>
 
 using std::string;
+using std::regex;
+using std::regex_search;
+using std::sregex_iterator;
 
 namespace had {
 
 	class String {
 
-		static constexpr char* alphaNum =
+		static inline const char* alphaNum =
 				"0123456789"
 				"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 				"abcdefghijklmnopqrstuvwxyz";
@@ -98,6 +102,30 @@ namespace had {
 			return ret;
 		}
 
+
+		/**
+		 * Replaces any str substrings that matches regex rgx.
+		 * Works in place.
+		 *
+		 * @param str 			string to be operated
+		 * @param rgx  			regex to search
+		 * @param replacement 	replacement string
+		 * @return true if at least one replacement took place
+		 */
+		static bool regex_replace(string &str, const string &rgx, const string& replacement) {
+			regex regexp(rgx);
+
+			//Search regex
+			auto begin = sregex_iterator(str.begin(), str.end(), regexp);
+			auto end = sregex_iterator();
+
+			//replace using iterator
+			for (auto i = begin; i != end; ++i)
+				str.replace(i->position(), i->length(), replacement);
+
+			//returns true if at least one match was found and replaced
+			return (begin != end);
+		}
 	};
 
 }
