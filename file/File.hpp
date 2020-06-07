@@ -94,16 +94,14 @@ namespace had {
 		 * @return the contents of sf as a string
 		 */
 		static string _read(FILE *const sf) {
-			array<char, bufsize> buffer;
-			int count;
 			string ret;
 
-			do {
-				count = fread(buffer.data(), 1, bufsize, sf);
-				ret.insert(ret.end(), begin(buffer), next(begin(buffer), count));
-			} while (count > 0);
-
+			fseek(sf, 0, SEEK_END);
+			ret.resize(std::ftell(sf));
+			rewind(sf);
+			fread(&ret[0], 1, ret.size(), sf);
 			return ret;
+
 		}
 
 
@@ -112,7 +110,7 @@ namespace had {
 		 * @param str string to be written
 		 */
 		static void _write(FILE *const sf, const string &str) {
-			int count, idx=0;
+			int idx=0;
 
 			fwrite(&str[idx], 1, str.size(), sf);
 		}
@@ -234,8 +232,29 @@ namespace had {
 			return ret;
 		}
 
+		//File descriptor
+		//FILE *sfm;
 
 	public:
+
+
+		/**
+		 *
+		 * @param fn filename of file to read
+		 * @param open mode: r r+ w w+ a a+
+		 * @return the contents of fn as a string
+		 */
+
+		/*File(const string &fn, const char* mode) {
+			sfm = fopen(fn.c_str(), mode);
+			if (!sfm) fileError(fn);
+		}
+
+		~File() {
+			fclose(sfm);
+		}
+		*/
+
 		/**
 		 *
 		 * @param fn filename of file to read
@@ -364,29 +383,6 @@ namespace had {
 			return ret;
 		}
 
-
-		/*
-		static string test(const string& expected, const string& actual) {
-			string ret;
-			FILE *sfexp, *sfact;
-
-			openFiles(expected, actual, sfexp, sfact);
-
-			//if size differs return both files
-			if (!_cmpbin(sfexp, sfact)) {
-				//rewind files
-				rwdFiles(sfexp, sfact);
-
-				ret += "Expected:\n";
-				ret += _read(sfexp);
-				ret += "Actual:\n";
-				ret += _read(sfact);
-			}
-
-			closeFiles(sfexp, sfact);
-			return ret;
-		}
-		*/
 
 		/**
 		 * @param expected filename of a file to compare
