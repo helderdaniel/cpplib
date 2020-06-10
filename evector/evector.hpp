@@ -52,6 +52,9 @@ An out-of-range access will throw an exception that the user can catch.
 */
 
 #include <iomanip>
+#include <vector>
+#include <cmath>  //get right version of std::abs for any type
+ 				  //if not will use cstdlib abs which is fr integers only
 
 using std::cout;
 using std::fixed;
@@ -65,7 +68,7 @@ namespace had {
 
 	template<typename T>
 	class evector : public vector<T> {
-		//on toString() consider zero if lower than printAsZero
+		//on to_string() consider zero if lower than printAsZero
 		//this way avoids printing negative zeros: -0.000
 		static constexpr double printAsZero = 1e-10;
 		static constexpr char defaultSeparator = ' ';
@@ -148,40 +151,6 @@ namespace had {
 			return accumulate(this->begin(), this->end(), 0.0) / this->size();
 		}
 
-		/**
-		 *
-		 * @param sep separator character, default is a ASCII space
-		 * @param prec precision
-		 * @param fixedPrec fixed precision
-		 * @return vector as a string
-		 */
-		string toString(char sep = defaultSeparator, int prec = defaultPrecision, int fixedPrec = defaultFixedPrecision) const {
-			stringstream os;
-			//override default precisions
-			if (prec >= 0) os << setprecision(prec);
-			if (fixedPrec >= 0) os << fixed << setprecision(fixedPrec);
-
-			os << "[" << sep;
-			for (int i = 0; i < this->size(); ++i) {
-				double val = (*this)[i];
-				//Avoid printing negative zero: -0.0 for very small number near zero
-				if (abs(val) < printAsZero)
-					val = 0.0;
-				os << val << sep;
-			}
-			os << "]";
-			return os.str();
-		}
-
-		//Could use Named Parameter Idiom
-		//https://isocpp.org/wiki/faq/ctors#named-parameter-idiom
-		//see also project namedParIdiom on these folders
-		string toString(int prec) const { return toString(defaultSeparator, prec); }
-		//Cannot do the next overload, cause signature is equal to previous overloaded func: toString(int)
-		//string toString(int fixedPrec) { return toString(defaultSeparator, defaultPrecision, fixedPrec); }
-
-		//template <typename T>
-		//friend ostream& operator<<(ostream& os, const evector<T>& v);
 
 		/**
 		 * PRE: a.size() == b.size()
@@ -192,34 +161,74 @@ namespace had {
 		 */
 		/*
 		 * Buggy
-	   evector<T>& operator-=(const evector<T>&a) {
+		evector<T>& operator-=(const evector<T>&a) {
 		   for (int i=0; i<a.size(); ++i)
 			   *this[i]-=a[i];
 		   return *this;
-	   }
+		}
 
-	   friend evector<T> operator-(evector<T>&a, const evector<T>& b) {
+		friend evector<T> operator-(evector<T>&a, const evector<T>& b) {
 		   return a-=b;
-	   }
+		}
 
-	   inline bool operator<(const T&a){
+		inline bool operator<(const T&a){
 		   for (int i=0; i<a.size(); ++i)
 			   if (!(*this[i]<a[i])) return false;
 		   return true;
-	   }
+		}
 
-	   friend inline bool operator<(const evector<T>&a, const evector<T>& b){
+		friend inline bool operator<(const evector<T>&a, const evector<T>& b){
 		   for (int i=0; i<a.size(); ++i)
 			   if (!(a[i]<b[i])) return false;
 		   return true;
-	   }
-	   */
+		}
+		*/
+
+		/**
+		*
+		* @param sep separator character, default is a ASCII space
+		* @param prec precision
+		* @param fixedPrec fixed precision
+		* @return vector as a string
+		*/
+		friend string to_string(const evector<T>& v,
+						 const char sep = defaultSeparator,
+						 const int prec = defaultPrecision,
+						 const int fixedPrec = defaultFixedPrecision) {
+			stringstream os;
+			//override default precisions
+			if (prec >= 0) os << setprecision(prec);
+			if (fixedPrec >= 0) os << fixed << setprecision(fixedPrec);
+
+			os << "[" << sep;
+			for (int i = 0; i < v.size(); ++i) {
+				double val = v[i];
+				//Avoid printing negative zero: -0.0 for very small number near zero
+
+				//use fabs(), cause cstdlib abs() will zero if -1 < val < 1 since is for integer
+				//if (fabs(val) < printAsZero)
+
+				//or include <cmath> and use std::abs as below:
+				if (std::abs(val) < printAsZero)
+					val = 0.0;
+				os << val << sep;
+			}
+			os << "]";
+			return os.str();
+		}
+
+		//Could use Named Parameter Idiom
+		//https://isocpp.org/wiki/faq/ctors#named-parameter-idiom
+		//see also project namedParIdiom on these folders
+		friend string to_string(const evector<T>& v, const int prec) { return to_string(v, defaultSeparator, prec); }
+		//Cannot do the next overload, cause signature is equal to previous overloaded func: toString(int)
+		//string toString(int fixedPrec) { return toString(defaultSeparator, defaultPrecision, fixedPrec); }
 	};
 
 
 	template<typename T>
 	ostream &operator<<(ostream &os, const evector<T> &v) {
-		os << v.toString();
+		os << to_string(v);
 		return os;
 	}
 

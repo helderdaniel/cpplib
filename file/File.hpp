@@ -439,7 +439,7 @@ namespace had {
 				int id = it.depth();
 				if (depth >= 0 && id > depth) continue;
 				if (regex_match(p.path().filename().c_str(), regex(regexstr)))
-					v.push_back(p.path());
+					v.emplace_back(p.path());
 			}
 			return v;
 		}
