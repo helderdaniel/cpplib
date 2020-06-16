@@ -3,8 +3,8 @@
  * hdaniel@ualg.pt may 2020
  */
 
-#ifndef MOOSHAKTOOLS_SHELL_H
-#define MOOSHAKTOOLS_SHELL_H
+#ifndef __HAD_SHELL_H__
+#define __HAD_SHELL_H__
 
 namespace had {
 
@@ -46,4 +46,4 @@ namespace had {
 
 }
 
-#endif //MOOSHAKTOOLS_SHELL_H
+#endif //__HAD_SHELL_H__

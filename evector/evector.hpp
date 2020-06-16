@@ -4,8 +4,8 @@
 // v1.0
 //
 
-#ifndef INC_04_WAVELETS_EVECTOR_HPP
-#define INC_04_WAVELETS_EVECTOR_HPP
+#ifndef __HAD_EVECTOR_HPP__
+#define __HAD_EVECTOR_HPP__
 
 
 /*
@@ -208,8 +208,8 @@ namespace had {
 				//use fabs(), cause cstdlib abs() will zero if -1 < val < 1 since is for integer
 				//if (fabs(val) < printAsZero)
 
-				//or include <cmath> and use std::abs as below:
-				if (std::abs(val) < printAsZero)
+				//or include <cmath> and use std::abs() or std::fabs() as below:
+				if (std::fabs(val) < printAsZero)
 					val = 0.0;
 				os << val << sep;
 			}
@@ -234,6 +234,6 @@ namespace had {
 
 } //end namespace had
 
-#endif //INC_04_WAVELETS_EVECTOR_HPP
+#endif //__HAD_EVECTOR_HPP__
 
 

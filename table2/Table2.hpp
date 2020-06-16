@@ -9,8 +9,8 @@
  * duplicated values will NOT be accessed by value
  */
 
-#ifndef MOOSHAKTOOLS_TABLE2_H
-#define MOOSHAKTOOLS_TABLE2_H
+#ifndef __HAD_TABLE2_HPP__
+#define __HAD_TABLE2_HPP__
 
 #include <map>
 
@@ -84,4 +84,4 @@ namespace had {
 
 }
 
-#endif //MOOSHAKTOOLS_TABLE2_H
+#endif //__HAD_TABLE2_HPP__

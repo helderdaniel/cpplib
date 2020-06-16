@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS  ${GCC_EXTRA_COMPILE_FLAGS})
 set(CMAKE_EXE_LINKER_FLAGS  ${GCC_EXTRA_LINK_FLAGS})
 
 #Project name
-project(String)
+project(Shell)
 
 #project folders
 set(TEST "test")
@@ -30,7 +30,7 @@ include_directories(. ${INCLUDE} )
 set(CATCH2LIB "${INCLUDE}/catch2/libCatch2.a")
 
 #Unit tests
-set(UNITTEST "testString")
+set(UNITTEST "testAppTest")
 add_executable(${UNITTEST} ${TEST}/${UNITTEST}.cpp)
 target_link_libraries(${UNITTEST} ${CATCH2LIB})
 

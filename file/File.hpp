@@ -5,8 +5,8 @@
  * 24/05/2020
  */
 
-#ifndef MOOSHAKTOOLS_FILE_H
-#define MOOSHAKTOOLS_FILE_H
+#ifndef __HAD_FILE_HPP__
+#define __HAD_FILE_HPP__
 
 #include <fstream>
 #include <istream>
@@ -177,7 +177,8 @@ namespace had {
 		 * @param  sf1 is another stream to compare against
 		 * @return true if streams sf0 and sf1 have equal contents
 		 */
-		static bool _cmpbin(istream sf0, istream sf1) {
+		static bool
+		_cmpbin(istream sf0, istream sf1) {
 			array<char, bufsize> buf0;
 			array<char, bufsize> buf1;
 			bool ret = true;
@@ -475,4 +476,4 @@ namespace had {
 
 }
 
-#endif //MOOSHAKTOOLS_FILE_H
+#endif //__HAD_FILE_HPP__

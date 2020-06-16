@@ -9,8 +9,8 @@
  *      Note:  Time is always real time, so it counts user inputs and event waits
  */
 
-#ifndef __STOPWATCH_HPP__
-#define __STOPWATCH_HPP__
+#ifndef __HAD_STOPWATCH_HPP__
+#define __HAD_STOPWATCH_HPP__
 
 #include <chrono>
 #include <iostream>
@@ -71,5 +71,5 @@ namespace had {
 
 }
 
-#endif //__STOPWATCH_HPP__
+#endif //__HAD_STOPWATCH_HPP__
 

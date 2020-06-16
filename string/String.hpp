@@ -5,8 +5,8 @@
  * 27/05/2020.
  */
 
-#ifndef MOOSHAKTOOLS_STRING_HPP
-#define MOOSHAKTOOLS_STRING_HPP
+#ifndef __HAD_STRING_HPP
+#define __HAD_STRING_HPP
 
 #include <cstring>
 #include <regex>
@@ -130,4 +130,4 @@ namespace had {
 
 }
 
-#endif //MOOSHAKTOOLS_STRING_HPP
+#endif //__HAD_STRING_HPP
