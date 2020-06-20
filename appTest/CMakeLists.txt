@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS  ${GCC_EXTRA_COMPILE_FLAGS})
 set(CMAKE_EXE_LINKER_FLAGS  ${GCC_EXTRA_LINK_FLAGS})
 
 #Project name
-project(Shell)
+project(AppTest)
 
 #project folders
 set(TEST "test")

@@ -24,22 +24,11 @@ const string file3e   = path + "file3e.txt";
 const string file3n   = path + "file3n.txt";
 const string file3nes = path + "file3nes.txt";
 const string file4    = path + "file4.txt";
+const string file5    = path + "file5.zip";
+const string fileIn   = path + "inner/file0.txt";
 const string fileNE   = "__NotExist__";
+
 const string fileNull;
-
-string searchPathToString(const string& dir, const string& regex, const int depth = -1) {
-	vector<fs::path> v;
-	string ret;
-
-	if (depth < 0) v = File::search(dir, regex);
-	else 		   v = File::search(dir, regex, depth);
-	sort(v.begin(), v.end());
-	for (const auto& p : v) {
-		ret += p;
-		ret += '\n';
-	}
-	return ret;
-}
 
 
 TEST_CASE( "Copy" "[File]" ) {
@@ -94,22 +83,19 @@ TEST_CASE( "Write" "[File]" ) {
 
 
 TEST_CASE( "Search" "[File]" ) {
-	const string expA =
-						"../test/samples/files/file0.copy.txt\n"
-						"../test/samples/files/file0.ro.txt\n"
-						"../test/samples/files/file0.rw.txt\n"
-						"../test/samples/files/file0.txt\n"
-				      	"../test/samples/files/file1.txt\n"
-		 			  	"../test/samples/files/file2.txt\n"
-					  	"../test/samples/files/file2n.txt\n";
-	const string expB =
-						"../test/samples/files/inner/file0.txt\n";
-	const string expC =
-						"../test/samples/files/file3.txt\n"
-						"../test/samples/files/file3e.txt\n"
-						"../test/samples/files/file3n.txt\n"
-						"../test/samples/files/file3nes.txt\n"
-						"../test/samples/files/file4.txt\n";
+	const string expA =	file0c + '\n' +
+						file0ro + '\n' +
+						file0rw + '\n' +
+						file0 + '\n' +
+						file1 + '\n' +
+						file2 + '\n' +
+						file2n + '\n';
+	const string expB = fileIn +'\n';
+	const string expC = file3 + '\n' +
+						file3e + '\n'  +
+						file3n + '\n'  +
+						file3nes + '\n' +
+						file4 + '\n';
 
 	const int cases = 3;
 	const string expected[] = {
@@ -123,20 +109,21 @@ TEST_CASE( "Search" "[File]" ) {
 						"file[0-2](.*)",	//filenames started with: "file[0-2]"
 						"(.*)txt" };        //filenames ended with:   "txt"
 
+	string s;
+
 	for (int i = 0; i < cases; ++i) {
-		auto s = searchPathToString(path, regex[i]);
+		s = File::search(path, regex[i], -1, true);
 		REQUIRE(expected[i] == s);
 	}
 
 	//Test depth
-	string s;
-	s = searchPathToString(path, regex[2], 0);
+	s = File::search(path, regex[2], 0, true);
 	REQUIRE(expected[3] == s);
-	s = searchPathToString(path, regex[2], 1);
+	s = File::search(path, regex[2], 1, true);
 	REQUIRE(expected[2] == s);
-	s = searchPathToString(path, regex[2], 2);
+	s = File::search(path, regex[2], 2, true);
 	REQUIRE(expected[2] == s);
-	s = searchPathToString(path, regex[2], 3);
+	s = File::search(path, regex[2], 3, true);
 	REQUIRE(expected[2] == s);
 }
 
@@ -339,5 +326,10 @@ TEST_CASE( "Compare" "[File]" ) {
 			REQUIRE(File::teststr(file3, File::read(file4)) == s34n);
 			REQUIRE(File::teststr(file4, File::read(file3)) == s43n);
 		}
-	}
+
+		SECTION("isZip") {
+			REQUIRE(!File::isZip(file0));
+			REQUIRE(File::isZip(file5));
+		}
+	};
 }

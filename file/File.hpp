@@ -430,13 +430,14 @@ namespace had {
 		 * @param dir    root dir to search
 		 * @param regex  filename regex
 		 * @param depth  maximum recursion depth (root dir has depth 0)
+		 *               by default does not stop at any death
 		 * @return vector of paths that matches regex, form root directory dir
 		 */
 		static vector<fs::path> search(const string &dir, const string &regexstr, const int depth = -1) {
 			vector<fs::path> v;
 
 			auto it = fs::recursive_directory_iterator(dir);
-			for (auto &p: it) {
+			for (const auto &p : it) {
 				int id = it.depth();
 				if (depth >= 0 && id > depth) continue;
 				if (regex_match(p.path().filename().c_str(), regex(regexstr)))
@@ -445,10 +446,32 @@ namespace had {
 			return v;
 		}
 
+		/**
+		 *
+		 * @param dir    root dir to search
+		 * @param regex  filename regex
+		 * @param depth  maximum recursion depth (root dir has depth 0)
+		 *  			 if depth <0 search at any depth
+		 * @param sort   sort list
+		 * @return string with paths that matches regex, form root directory dir
+		 */
+		static string search(const string& dir, const string& regex, const int depth, const bool sort) {
+			vector<fs::path> v;
+			string ret;
+
+			v = search(dir, regex, depth);
+			if(sort) std::sort(v.begin(), v.end());
+			for (const auto& p : v) {
+				ret += p;
+				ret += '\n';
+			}
+			return ret;
+		}
+
 
 		/**
 		* Copies file src to file dest.
-		* overwrites desd.
+		* overwrites dest.
 		*
 		* @param fn0 filename of source file
 		* @param fn1 filename of destination file
@@ -470,6 +493,26 @@ namespace had {
 			} while (count > 0);
 
 			closeFiles(sfsrc, sfdst);
+		}
+
+		/*
+		 * https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+		 * https://en.wikipedia.org/wiki/Zip_(file_format)
+		 * https://stackoverflow.com/questions/1887041/what-is-a-good-way-to-test-a-file-to-see-if-its-a-zip-file/1887113#1887113
+		 */
+		/**
+		 * @param fn pathe ti file being tested
+		 * @return true if fn file is a zip archive with lead 4 bytes: 'P' 'K' 0x03 0x04
+		 * Does NOT detect zip embedded in other file formats such as: jpeg, open office xml, etc.
+		 * or if is an empty or spanned zip archive
+		 */
+		static bool isZip(const string &fn) {
+			char head[] = { 0, 0, 0, 0};
+
+			ifstream file(fn.c_str(), ifstream::binary);
+			file.getline(head, 5);
+
+			return head[0] == 'P' && head[1] == 'K' && head[2] == 3 && head[3] == 4;
 		}
 
 	};
