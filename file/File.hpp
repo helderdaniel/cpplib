@@ -426,6 +426,7 @@ namespace had {
 
 
 		/**
+		 * Searches for files form folder dir, skiping folder with invalid permissions
 		 *
 		 * @param dir    root dir to search
 		 * @param regex  filename regex
@@ -436,13 +437,16 @@ namespace had {
 		static vector<fs::path> search(const string &dir, const string &regexstr, const int depth = -1) {
 			vector<fs::path> v;
 
-			auto it = fs::recursive_directory_iterator(dir);
-			for (const auto &p : it) {
-				int id = it.depth();
-				if (depth >= 0 && id > depth) continue;
-				if (regex_match(p.path().filename().c_str(), regex(regexstr)))
-					v.emplace_back(p.path());
-			}
+			//Skip files that do NOT have permissions
+			auto it = fs::recursive_directory_iterator(dir, fs::directory_options::skip_permission_denied);
+
+            for (const auto &p : it) {
+                int id = it.depth();
+                if (depth >= 0 && id > depth) continue;
+                if (regex_match(p.path().filename().c_str(), regex(regexstr)))
+                    v.emplace_back(p.path());
+            }
+
 			return v;
 		}
 
