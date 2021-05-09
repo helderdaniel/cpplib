@@ -7,7 +7,7 @@
  *      Note0: cpuTime() is read first, so should be a little slower, even if realTime()
  *             measure was not delayed by waiting for some event.
  *		Note1: unlike previous versions cpuTime() and realTime() do not call lap()
- *		Note2: Current implemntation of realTime() has miliseconds resolution.
+ *		Note2: Current implementation of realTime() has miliseconds resolution.
  *		       std::chrono can be used in C++14 to get real time with higher resolution
  *		       (however duration.count() is an integer):
  *
@@ -55,7 +55,7 @@ public:
 	}
 
 	/**
-	 * Returns time elapsed since last reset() until last lap()
+	 * Returns time elapsed  in secs since last reset() until last lap()
 	 * DOES count user input like wait keypress
 	 */
 	double realTime() {
@@ -67,7 +67,7 @@ public:
 	};
 
 	/**
-	 * Returns time elapsed since last reset() until last lap()
+	 * Returns time elapsed  in secs since last reset() until last lap()
 	 * DOES NOT count user input like wait keypress
 	 * (just processor ticks)
      */
